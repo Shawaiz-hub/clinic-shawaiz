@@ -18,6 +18,9 @@ import * as XLSX from 'xlsx';
 import { Download, Edit, Trash2, Plus, ArrowLeft, Moon, Sun } from "lucide-react";
 import { usePatientData } from "@/contexts/PatientDataContext";
 import { Link } from "react-router-dom";
+import { format } from "date-fns";
+import Logo from "@/components/Logo";
+import HistorySaver from "@/components/HistorySaver";
 
 const ExcelManagement = () => {
   const { patientData, setPatientData, theme, toggleTheme } = usePatientData();
@@ -32,10 +35,44 @@ const ExcelManagement = () => {
     visitDate: ""
   });
 
+  // Format date function for displaying
+  const formatVisitDate = (dateString: string) => {
+    if (!dateString) return "-";
+    
+    // Handle Excel serial numbers
+    if (!isNaN(Number(dateString))) {
+      const excelEpoch = new Date(1899, 11, 30);
+      const daysToAdd = Number(dateString);
+      const date = new Date(excelEpoch);
+      date.setDate(date.getDate() + daysToAdd);
+      
+      return format(date, "yyyy-MM-dd");
+    }
+    
+    // Try to parse as regular date string
+    try {
+      const date = new Date(dateString);
+      if (!isNaN(date.getTime())) {
+        return format(date, "yyyy-MM-dd");
+      }
+    } catch (error) {
+      console.error("Error formatting date:", error);
+    }
+    
+    return dateString;
+  };
+
   // Handle editing a patient
   const handleEdit = (patient: PatientData) => {
     setSelectedPatient(patient);
-    setEditedPatient({ ...patient });
+    
+    // Format the date for the input field
+    const formattedPatient = {
+      ...patient,
+      visitDate: formatVisitDate(patient.visitDate)
+    };
+    
+    setEditedPatient(formattedPatient);
     setEditOpen(true);
   };
 
@@ -133,8 +170,13 @@ const ExcelManagement = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
-      <div className="container mx-auto p-4 space-y-4">
+    <div className="min-h-screen bg-background text-foreground transition-colors duration-300 bg-gradient-to-br from-background to-secondary">
+      {/* Electric-inspired background pattern */}
+      <div className="absolute inset-0 z-0 opacity-5">
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"60\" height=\"60\" viewBox=\"0 0 60 60\"><path d=\"M29 58.58l7.38-7.39A30.95 30.95 0 0 1 29 37.84a30.95 30.95 0 0 1-7.38 13.36l7.37 7.38zm1.4-1.41l6.46-6.46a29.92 29.92 0 0 0 5.17-9.2 28.9 28.9 0 0 0 1.87-10.18v-1.04c0-3.25-.57-6.4-1.66-9.33a29.92 29.92 0 0 0-4.24-8.06c-1.77-2.39-3.96-4.58-6.35-6.35a28.9 28.9 0 0 0-8.07-4.25 29.3 29.3 0 0 0-9.33-1.66 29.3 29.3 0 0 0-9.33 1.66 28.9 28.9 0 0 0-8.07 4.25c-2.39 1.77-4.58 3.96-6.35 6.35a29.92 29.92 0 0 0-4.24 8.06c-1.1 2.94-1.66 6.08-1.66 9.33v1.04c0 3.68.74 7.2 2.08 10.42s3.28 6.14 5.73 8.59l6.46 6.46a30 30 0 0 0 21.27 8.8c7.36 0 14.24-2.75 19.55-7.77l.82-.81.06-.06z\" fill=\"currentColor\"/></svg>')] bg-repeat"></div>
+      </div>
+      
+      <div className="relative z-10 container mx-auto p-4 space-y-4">
         <div className="flex justify-between items-center mb-4">
           <div className="flex items-center gap-4">
             <Link to="/">
@@ -142,7 +184,10 @@ const ExcelManagement = () => {
                 <ArrowLeft className="h-4 w-4" /> Back to Dashboard
               </Button>
             </Link>
-            <h2 className="text-2xl font-bold">Excel Management</h2>
+            <div className="flex items-center gap-4">
+              <Logo />
+              <h2 className="text-2xl font-bold font-heading">Excel Management</h2>
+            </div>
           </div>
           <div className="flex items-center gap-2">
             <Button 
@@ -168,6 +213,11 @@ const ExcelManagement = () => {
             </Button>
           </div>
         </div>
+        
+        {/* History Saver */}
+        <div className="flex justify-end">
+          <HistorySaver />
+        </div>
 
         {/* Patient Table */}
         <div className="bg-card border border-border rounded-lg overflow-hidden">
@@ -191,7 +241,7 @@ const ExcelManagement = () => {
                       <TableCell>{patient.age}</TableCell>
                       <TableCell>{patient.gender}</TableCell>
                       <TableCell>{patient.area}</TableCell>
-                      <TableCell>{patient.visitDate}</TableCell>
+                      <TableCell>{formatVisitDate(patient.visitDate)}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
                           <Button
@@ -228,7 +278,7 @@ const ExcelManagement = () => {
         <Dialog open={editOpen} onOpenChange={setEditOpen}>
           <DialogContent className="bg-card">
             <DialogHeader>
-              <DialogTitle>Edit Patient Record</DialogTitle>
+              <DialogTitle className="font-heading">Edit Patient Record</DialogTitle>
               <DialogDescription>Make changes to the patient information below.</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
@@ -293,7 +343,7 @@ const ExcelManagement = () => {
         <Dialog open={addOpen} onOpenChange={setAddOpen}>
           <DialogContent className="bg-card">
             <DialogHeader>
-              <DialogTitle>Add New Patient</DialogTitle>
+              <DialogTitle className="font-heading">Add New Patient</DialogTitle>
               <DialogDescription>Enter the patient information below.</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
@@ -353,6 +403,13 @@ const ExcelManagement = () => {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+        
+        {/* Footer */}
+        <footer className="bg-card border-t mt-10 p-4 rounded-lg">
+          <div className="text-center text-sm text-muted-foreground">
+            © 2025 Clinic Location Analysis Dashboard by <span className="font-bold text-primary">Shawaiz (Data Scientist)</span>
+          </div>
+        </footer>
       </div>
     </div>
   );

@@ -14,6 +14,8 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { usePatientData } from "@/contexts/PatientDataContext";
 import { Moon, Sun } from "lucide-react";
+import Logo from "@/components/Logo";
+import HistorySaver from "@/components/HistorySaver";
 
 const Index = () => {
   const { patientData, setPatientData, theme, toggleTheme } = usePatientData();
@@ -46,17 +48,25 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
-      <header className="bg-card border-b border-border">
+    <div className="min-h-screen bg-background text-foreground transition-colors duration-300 bg-gradient-to-br from-background to-secondary">
+      {/* Electric-inspired background pattern */}
+      <div className="absolute inset-0 z-0 opacity-5">
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"60\" height=\"60\" viewBox=\"0 0 60 60\"><path d=\"M29 58.58l7.38-7.39A30.95 30.95 0 0 1 29 37.84a30.95 30.95 0 0 1-7.38 13.36l7.37 7.38zm1.4-1.41l6.46-6.46a29.92 29.92 0 0 0 5.17-9.2 28.9 28.9 0 0 0 1.87-10.18v-1.04c0-3.25-.57-6.4-1.66-9.33a29.92 29.92 0 0 0-4.24-8.06c-1.77-2.39-3.96-4.58-6.35-6.35a28.9 28.9 0 0 0-8.07-4.25 29.3 29.3 0 0 0-9.33-1.66 29.3 29.3 0 0 0-9.33 1.66 28.9 28.9 0 0 0-8.07 4.25c-2.39 1.77-4.58 3.96-6.35 6.35a29.92 29.92 0 0 0-4.24 8.06c-1.1 2.94-1.66 6.08-1.66 9.33v1.04c0 3.68.74 7.2 2.08 10.42s3.28 6.14 5.73 8.59l6.46 6.46a30 30 0 0 0 21.27 8.8c7.36 0 14.24-2.75 19.55-7.77l.82-.81.06-.06z\" fill=\"currentColor\"/></svg>')] bg-repeat"></div>
+      </div>
+      
+      <header className="relative z-10 bg-card border-b border-border">
         <div className="container mx-auto py-6">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-primary">
-                Clinic Location Analysis Dashboard
-              </h1>
-              <p className="text-muted-foreground">
-                Analyze patient data to find the optimal location for a new clinic
-              </p>
+            <div className="flex items-center gap-4">
+              <Logo />
+              <div>
+                <h1 className="text-2xl font-heading font-bold text-primary">
+                  Clinic Location Analysis Dashboard
+                </h1>
+                <p className="text-muted-foreground">
+                  Analyze patient data to find the optimal location for a new clinic
+                </p>
+              </div>
             </div>
             <div className="flex items-center gap-4">
               <Button 
@@ -78,9 +88,12 @@ const Index = () => {
         </div>
       </header>
       
-      <main className="container mx-auto py-6 px-4">
+      <main className="container mx-auto py-6 px-4 relative z-10">
         <div className="grid grid-cols-1 gap-6">
-          <FileUpload onDataUploaded={handleDataUploaded} />
+          <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+            <FileUpload onDataUploaded={handleDataUploaded} />
+            <HistorySaver />
+          </div>
           
           <Tabs defaultValue="dashboard" value={activeTab} onValueChange={setActiveTab}>
             <TabsList>
@@ -105,7 +118,7 @@ const Index = () => {
                 </>
               ) : (
                 <div className="text-center py-10">
-                  <h2 className="text-xl font-semibold text-foreground mb-2">
+                  <h2 className="text-xl font-semibold text-foreground mb-2 font-heading">
                     Welcome to the Clinic Location Analysis Dashboard
                   </h2>
                   <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
@@ -114,7 +127,7 @@ const Index = () => {
                     provide insights through visualizations and predictive analytics.
                   </p>
                   <div className="max-w-md mx-auto p-4 bg-accent rounded-lg border border-border">
-                    <h3 className="font-medium text-accent-foreground">Required Excel Columns:</h3>
+                    <h3 className="font-medium text-accent-foreground font-heading">Required Excel Columns:</h3>
                     <ul className="text-sm text-muted-foreground mt-2 grid grid-cols-2 gap-x-4 gap-y-1">
                       <li>• Name: Patient's name</li>
                       <li>• Age: Patient's age</li>
@@ -135,7 +148,7 @@ const Index = () => {
               <PredictionModel timeSeriesData={timeSeriesData} />
               {patientData.length > 0 && (
                 <div className="bg-card p-6 rounded-lg border border-border">
-                  <h3 className="text-lg font-semibold mb-3">Analysis Insights</h3>
+                  <h3 className="text-lg font-semibold mb-3 font-heading">Analysis Insights</h3>
                   <p className="text-muted-foreground mb-4">
                     Based on the patient data analysis, here are some key insights:
                   </p>
@@ -172,10 +185,10 @@ const Index = () => {
         </div>
       </main>
       
-      <footer className="bg-card border-t mt-10">
+      <footer className="bg-card border-t mt-10 relative z-10">
         <div className="container mx-auto py-4 px-4">
           <div className="flex flex-col md:flex-row justify-between items-center text-sm text-muted-foreground">
-            <p>© 2025 Clinic Location Analysis Dashboard</p>
+            <p>© 2025 Clinic Location Analysis Dashboard by <span className="font-bold text-primary">Shawaiz (Data Scientist)</span></p>
             <p>Data visualizations powered by Recharts</p>
           </div>
         </div>

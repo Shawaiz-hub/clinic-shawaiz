@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { format } from "date-fns";
 
 interface PatientTableProps {
   data: PatientData[];
@@ -23,6 +24,37 @@ const PatientTable = ({ data }: PatientTableProps) => {
     patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     patient.area.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Format date function
+  const formatVisitDate = (dateString: string) => {
+    if (!dateString) return "-";
+    
+    // Handle Excel serial numbers (which are days since 1900-01-01)
+    if (!isNaN(Number(dateString))) {
+      // Convert Excel date serial to JavaScript Date
+      // Excel's epoch starts on 1900-01-01, but there's a leap year bug
+      // where Excel incorrectly assumes 1900 is a leap year
+      const excelEpoch = new Date(1899, 11, 30);
+      const daysToAdd = Number(dateString);
+      const date = new Date(excelEpoch);
+      date.setDate(date.getDate() + daysToAdd);
+      
+      return format(date, "MMM dd, yyyy");
+    }
+    
+    // Try to parse as regular date string
+    try {
+      const date = new Date(dateString);
+      if (!isNaN(date.getTime())) {
+        return format(date, "MMM dd, yyyy");
+      }
+    } catch (error) {
+      console.error("Error formatting date:", error);
+    }
+    
+    // Return original if we can't parse it
+    return dateString;
+  };
 
   return (
     <div className="space-y-4">
@@ -55,7 +87,7 @@ const PatientTable = ({ data }: PatientTableProps) => {
                   <TableCell>{patient.age}</TableCell>
                   <TableCell>{patient.gender}</TableCell>
                   <TableCell>{patient.area}</TableCell>
-                  <TableCell>{patient.visitDate}</TableCell>
+                  <TableCell>{formatVisitDate(patient.visitDate)}</TableCell>
                 </TableRow>
               ))
             ) : (
