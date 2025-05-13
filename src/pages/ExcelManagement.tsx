@@ -173,7 +173,7 @@ const ExcelManagement = () => {
     <div className="min-h-screen bg-background text-foreground transition-colors duration-300 bg-gradient-to-br from-background to-secondary">
       {/* Electric-inspired background pattern */}
       <div className="absolute inset-0 z-0 opacity-5">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"60\" height=\"60\" viewBox=\"0 0 60 60\"><path d=\"M29 58.58l7.38-7.39A30.95 30.95 0 0 1 29 37.84a30.95 30.95 0 0 1-7.38 13.36l7.37 7.38zm1.4-1.41l6.46-6.46a29.92 29.92 0 0 0 5.17-9.2 28.9 28.9 0 0 0 1.87-10.18v-1.04c0-3.25-.57-6.4-1.66-9.33a29.92 29.92 0 0 0-4.24-8.06c-1.77-2.39-3.96-4.58-6.35-6.35a28.9 28.9 0 0 0-8.07-4.25 29.3 29.3 0 0 0-9.33-1.66 29.3 29.3 0 0 0-9.33 1.66 28.9 28.9 0 0 0-8.07 4.25c-2.39 1.77-4.58 3.96-6.35 6.35a29.92 29.92 0 0 0-4.24 8.06c-1.1 2.94-1.66 6.08-1.66 9.33v1.04c0 3.68.74 7.2 2.08 10.42s3.28 6.14 5.73 8.59l6.46 6.46a30 30 0 0 0 21.27 8.8c7.36 0 14.24-2.75 19.55-7.77l.82-.81.06-.06z\" fill=\"currentColor\"/></svg>')] bg-repeat"></div>
+        <div className="absolute inset-0 bg-circuit-pattern bg-repeat"></div>
       </div>
       
       <div className="relative z-10 container mx-auto p-4 space-y-4">
