@@ -10,9 +10,12 @@ import RecommendationCard from "@/components/RecommendationCard";
 import { getAreaCounts, getTimeSeriesData, getBestAreaRecommendation } from "@/utils/dataProcessing";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
+import { usePatientData } from "@/contexts/PatientDataContext";
 
 const Index = () => {
-  const [patientData, setPatientData] = useState<PatientData[]>([]);
+  const { patientData, setPatientData } = usePatientData();
   const [areaCounts, setAreaCounts] = useState<AreaCount[]>([]);
   const [timeSeriesData, setTimeSeriesData] = useState<TimeSeriesData[]>([]);
   const [bestArea, setBestArea] = useState<AreaCount | null>(null);
@@ -46,10 +49,13 @@ const Index = () => {
                 Analyze patient data to find the optimal location for a new clinic
               </p>
             </div>
-            <div className="text-sm text-gray-500">
+            <div className="flex items-center gap-4">
               {patientData.length > 0 && (
-                <span>{patientData.length} patients analyzed</span>
+                <span className="text-sm text-gray-500">{patientData.length} patients analyzed</span>
               )}
+              <Link to="/excel-management">
+                <Button variant="outline">Manage Excel Data</Button>
+              </Link>
             </div>
           </div>
         </div>
