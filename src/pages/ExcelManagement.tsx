@@ -11,18 +11,16 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import * as XLSX from 'xlsx';
-import { Download, Edit, Trash2, Plus } from "lucide-react";
+import { Download, Edit, Trash2, Plus, ArrowLeft, Moon, Sun } from "lucide-react";
+import { usePatientData } from "@/contexts/PatientDataContext";
+import { Link } from "react-router-dom";
 
-interface ExcelManagementProps {
-  data: PatientData[];
-  onDataUpdate: (data: PatientData[]) => void;
-}
-
-const ExcelManagement = ({ data, onDataUpdate }: ExcelManagementProps) => {
+const ExcelManagement = () => {
+  const { patientData, setPatientData, theme, toggleTheme } = usePatientData();
   const [editOpen, setEditOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<PatientData | null>(null);
@@ -55,18 +53,18 @@ const ExcelManagement = ({ data, onDataUpdate }: ExcelManagementProps) => {
 
   // Handle deleting a patient
   const handleDelete = (patient: PatientData) => {
-    const updatedData = data.filter(p => p !== patient);
-    onDataUpdate(updatedData);
+    const updatedData = patientData.filter(p => p !== patient);
+    setPatientData(updatedData);
     toast.success("Patient record deleted successfully");
   };
 
   // Save edited patient data
   const saveEditedPatient = () => {
     if (selectedPatient) {
-      const updatedData = data.map(patient => 
+      const updatedData = patientData.map(patient => 
         patient === selectedPatient ? editedPatient : patient
       );
-      onDataUpdate(updatedData);
+      setPatientData(updatedData);
       setEditOpen(false);
       toast.success("Patient record updated successfully");
     }
@@ -75,8 +73,8 @@ const ExcelManagement = ({ data, onDataUpdate }: ExcelManagementProps) => {
   // Save new patient data
   const saveNewPatient = () => {
     if (validatePatient(editedPatient)) {
-      const updatedData = [...data, editedPatient];
-      onDataUpdate(updatedData);
+      const updatedData = [...patientData, editedPatient];
+      setPatientData(updatedData);
       setAddOpen(false);
       toast.success("Patient record added successfully");
     }
@@ -118,7 +116,7 @@ const ExcelManagement = ({ data, onDataUpdate }: ExcelManagementProps) => {
 
   // Download Excel file
   const handleDownload = () => {
-    const worksheet = XLSX.utils.json_to_sheet(data.map(patient => ({
+    const worksheet = XLSX.utils.json_to_sheet(patientData.map(patient => ({
       Name: patient.name,
       Age: patient.age,
       Gender: patient.gender,
@@ -135,206 +133,227 @@ const ExcelManagement = ({ data, onDataUpdate }: ExcelManagementProps) => {
   };
 
   return (
-    <div className="space-y-4 p-4">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold">Excel Management</h2>
-        <div className="space-x-2">
-          <Button 
-            onClick={handleAddNew} 
-            className="bg-green-600 hover:bg-green-700"
-          >
-            <Plus className="mr-2 h-4 w-4" /> Add Patient
-          </Button>
-          <Button 
-            onClick={handleDownload} 
-            variant="outline"
-            disabled={data.length === 0}
-          >
-            <Download className="mr-2 h-4 w-4" /> Download Excel
-          </Button>
+    <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
+      <div className="container mx-auto p-4 space-y-4">
+        <div className="flex justify-between items-center mb-4">
+          <div className="flex items-center gap-4">
+            <Link to="/">
+              <Button variant="outline" className="gap-2">
+                <ArrowLeft className="h-4 w-4" /> Back to Dashboard
+              </Button>
+            </Link>
+            <h2 className="text-2xl font-bold">Excel Management</h2>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              size="icon" 
+              onClick={toggleTheme}
+              className="rounded-full"
+            >
+              {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+            </Button>
+            <Button 
+              onClick={handleAddNew} 
+              className="bg-primary hover:bg-primary/90"
+            >
+              <Plus className="mr-2 h-4 w-4" /> Add Patient
+            </Button>
+            <Button 
+              onClick={handleDownload} 
+              variant="outline"
+              disabled={patientData.length === 0}
+            >
+              <Download className="mr-2 h-4 w-4" /> Download Excel
+            </Button>
+          </div>
         </div>
-      </div>
 
-      {/* Patient Table */}
-      <ScrollArea className="h-[500px] border rounded-md">
-        <Table>
-          <TableHeader className="sticky top-0 bg-white z-10">
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Age</TableHead>
-              <TableHead>Gender</TableHead>
-              <TableHead>Area</TableHead>
-              <TableHead>Visit Date</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {data.length > 0 ? (
-              data.map((patient, index) => (
-                <TableRow key={`${patient.name}-${index}`}>
-                  <TableCell>{patient.name}</TableCell>
-                  <TableCell>{patient.age}</TableCell>
-                  <TableCell>{patient.gender}</TableCell>
-                  <TableCell>{patient.area}</TableCell>
-                  <TableCell>{patient.visitDate}</TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => handleEdit(patient)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => handleDelete(patient)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
+        {/* Patient Table */}
+        <div className="bg-card border border-border rounded-lg overflow-hidden">
+          <ScrollArea className="h-[500px]">
+            <Table>
+              <TableHeader className="sticky top-0 bg-muted z-10">
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Age</TableHead>
+                  <TableHead>Gender</TableHead>
+                  <TableHead>Area</TableHead>
+                  <TableHead>Visit Date</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={6} className="text-center py-4">
-                  No patient data available. Upload or add patient records.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </ScrollArea>
+              </TableHeader>
+              <TableBody>
+                {patientData.length > 0 ? (
+                  patientData.map((patient, index) => (
+                    <TableRow key={`${patient.name}-${index}`}>
+                      <TableCell>{patient.name}</TableCell>
+                      <TableCell>{patient.age}</TableCell>
+                      <TableCell>{patient.gender}</TableCell>
+                      <TableCell>{patient.area}</TableCell>
+                      <TableCell>{patient.visitDate}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleEdit(patient)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleDelete(patient)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-4">
+                      No patient data available. Upload or add patient records.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </ScrollArea>
+        </div>
 
-      {/* Edit Dialog */}
-      <Dialog open={editOpen} onOpenChange={setEditOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Edit Patient Record</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label htmlFor="name" className="text-sm font-medium">Name</label>
-                <Input
-                  id="name"
-                  name="name"
-                  value={editedPatient.name}
-                  onChange={handleInputChange}
-                />
-              </div>
-              <div className="space-y-2">
-                <label htmlFor="age" className="text-sm font-medium">Age</label>
-                <Input
-                  id="age"
-                  name="age"
-                  type="number"
-                  value={editedPatient.age}
-                  onChange={handleInputChange}
-                />
-              </div>
-              <div className="space-y-2">
-                <label htmlFor="gender" className="text-sm font-medium">Gender</label>
-                <Input
-                  id="gender"
-                  name="gender"
-                  value={editedPatient.gender}
-                  onChange={handleInputChange}
-                />
-              </div>
-              <div className="space-y-2">
-                <label htmlFor="area" className="text-sm font-medium">Area</label>
-                <Input
-                  id="area"
-                  name="area"
-                  value={editedPatient.area}
-                  onChange={handleInputChange}
-                />
-              </div>
-              <div className="space-y-2 col-span-2">
-                <label htmlFor="visitDate" className="text-sm font-medium">Visit Date</label>
-                <Input
-                  id="visitDate"
-                  name="visitDate"
-                  type="date"
-                  value={editedPatient.visitDate}
-                  onChange={handleInputChange}
-                />
+        {/* Edit Dialog */}
+        <Dialog open={editOpen} onOpenChange={setEditOpen}>
+          <DialogContent className="bg-card">
+            <DialogHeader>
+              <DialogTitle>Edit Patient Record</DialogTitle>
+              <DialogDescription>Make changes to the patient information below.</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label htmlFor="name" className="text-sm font-medium">Name</label>
+                  <Input
+                    id="name"
+                    name="name"
+                    value={editedPatient.name}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="age" className="text-sm font-medium">Age</label>
+                  <Input
+                    id="age"
+                    name="age"
+                    type="number"
+                    value={editedPatient.age}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="gender" className="text-sm font-medium">Gender</label>
+                  <Input
+                    id="gender"
+                    name="gender"
+                    value={editedPatient.gender}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="area" className="text-sm font-medium">Area</label>
+                  <Input
+                    id="area"
+                    name="area"
+                    value={editedPatient.area}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div className="space-y-2 col-span-2">
+                  <label htmlFor="visitDate" className="text-sm font-medium">Visit Date</label>
+                  <Input
+                    id="visitDate"
+                    name="visitDate"
+                    type="date"
+                    value={editedPatient.visitDate}
+                    onChange={handleInputChange}
+                  />
+                </div>
               </div>
             </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setEditOpen(false)}>Cancel</Button>
-            <Button onClick={saveEditedPatient}>Save Changes</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setEditOpen(false)}>Cancel</Button>
+              <Button onClick={saveEditedPatient}>Save Changes</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
-      {/* Add Dialog */}
-      <Dialog open={addOpen} onOpenChange={setAddOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Add New Patient</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label htmlFor="name" className="text-sm font-medium">Name</label>
-                <Input
-                  id="name"
-                  name="name"
-                  value={editedPatient.name}
-                  onChange={handleInputChange}
-                />
-              </div>
-              <div className="space-y-2">
-                <label htmlFor="age" className="text-sm font-medium">Age</label>
-                <Input
-                  id="age"
-                  name="age"
-                  type="number"
-                  value={editedPatient.age}
-                  onChange={handleInputChange}
-                />
-              </div>
-              <div className="space-y-2">
-                <label htmlFor="gender" className="text-sm font-medium">Gender</label>
-                <Input
-                  id="gender"
-                  name="gender"
-                  value={editedPatient.gender}
-                  onChange={handleInputChange}
-                />
-              </div>
-              <div className="space-y-2">
-                <label htmlFor="area" className="text-sm font-medium">Area</label>
-                <Input
-                  id="area"
-                  name="area"
-                  value={editedPatient.area}
-                  onChange={handleInputChange}
-                />
-              </div>
-              <div className="space-y-2 col-span-2">
-                <label htmlFor="visitDate" className="text-sm font-medium">Visit Date</label>
-                <Input
-                  id="visitDate"
-                  name="visitDate"
-                  type="date"
-                  value={editedPatient.visitDate}
-                  onChange={handleInputChange}
-                />
+        {/* Add Dialog */}
+        <Dialog open={addOpen} onOpenChange={setAddOpen}>
+          <DialogContent className="bg-card">
+            <DialogHeader>
+              <DialogTitle>Add New Patient</DialogTitle>
+              <DialogDescription>Enter the patient information below.</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label htmlFor="name" className="text-sm font-medium">Name</label>
+                  <Input
+                    id="name"
+                    name="name"
+                    value={editedPatient.name}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="age" className="text-sm font-medium">Age</label>
+                  <Input
+                    id="age"
+                    name="age"
+                    type="number"
+                    value={editedPatient.age}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="gender" className="text-sm font-medium">Gender</label>
+                  <Input
+                    id="gender"
+                    name="gender"
+                    value={editedPatient.gender}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="area" className="text-sm font-medium">Area</label>
+                  <Input
+                    id="area"
+                    name="area"
+                    value={editedPatient.area}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div className="space-y-2 col-span-2">
+                  <label htmlFor="visitDate" className="text-sm font-medium">Visit Date</label>
+                  <Input
+                    id="visitDate"
+                    name="visitDate"
+                    type="date"
+                    value={editedPatient.visitDate}
+                    onChange={handleInputChange}
+                  />
+                </div>
               </div>
             </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setAddOpen(false)}>Cancel</Button>
-            <Button onClick={saveNewPatient}>Add Patient</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setAddOpen(false)}>Cancel</Button>
+              <Button onClick={saveNewPatient}>Add Patient</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
     </div>
   );
 };

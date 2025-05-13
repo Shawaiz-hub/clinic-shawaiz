@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { PatientData, AreaCount, TimeSeriesData } from "@/types/PatientData";
 import FileUpload from "@/components/FileUpload";
 import PatientTable from "@/components/PatientTable";
@@ -13,17 +13,22 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { usePatientData } from "@/contexts/PatientDataContext";
+import { Moon, Sun } from "lucide-react";
 
 const Index = () => {
-  const { patientData, setPatientData } = usePatientData();
+  const { patientData, setPatientData, theme, toggleTheme } = usePatientData();
   const [areaCounts, setAreaCounts] = useState<AreaCount[]>([]);
   const [timeSeriesData, setTimeSeriesData] = useState<TimeSeriesData[]>([]);
   const [bestArea, setBestArea] = useState<AreaCount | null>(null);
   const [activeTab, setActiveTab] = useState("dashboard");
 
-  const handleDataUploaded = (data: PatientData[]) => {
-    setPatientData(data);
-    
+  useEffect(() => {
+    if (patientData.length > 0) {
+      processPatientData(patientData);
+    }
+  }, [patientData]);
+
+  const processPatientData = (data: PatientData[]) => {
     // Process data for visualizations
     const areaCountsData = getAreaCounts(data);
     setAreaCounts(areaCountsData);
@@ -36,22 +41,34 @@ const Index = () => {
     setBestArea(getBestAreaRecommendation(areaCountsData));
   };
 
+  const handleDataUploaded = (data: PatientData[]) => {
+    setPatientData(data);
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b">
+    <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
+      <header className="bg-card border-b border-border">
         <div className="container mx-auto py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-blue-800">
+              <h1 className="text-2xl font-bold text-primary">
                 Clinic Location Analysis Dashboard
               </h1>
-              <p className="text-gray-500">
+              <p className="text-muted-foreground">
                 Analyze patient data to find the optimal location for a new clinic
               </p>
             </div>
             <div className="flex items-center gap-4">
+              <Button 
+                variant="outline" 
+                size="icon" 
+                onClick={toggleTheme}
+                className="rounded-full"
+              >
+                {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+              </Button>
               {patientData.length > 0 && (
-                <span className="text-sm text-gray-500">{patientData.length} patients analyzed</span>
+                <span className="text-sm text-muted-foreground">{patientData.length} patients analyzed</span>
               )}
               <Link to="/excel-management">
                 <Button variant="outline">Manage Excel Data</Button>
@@ -88,17 +105,17 @@ const Index = () => {
                 </>
               ) : (
                 <div className="text-center py-10">
-                  <h2 className="text-xl font-semibold text-gray-700 mb-2">
+                  <h2 className="text-xl font-semibold text-foreground mb-2">
                     Welcome to the Clinic Location Analysis Dashboard
                   </h2>
-                  <p className="text-gray-500 mb-6 max-w-2xl mx-auto">
+                  <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
                     Upload your patient Excel file to analyze distribution patterns and identify the 
                     optimal location for your new clinic. The dashboard will process your data and 
                     provide insights through visualizations and predictive analytics.
                   </p>
-                  <div className="max-w-md mx-auto p-4 bg-blue-50 rounded-lg border border-blue-100">
-                    <h3 className="font-medium text-blue-700">Required Excel Columns:</h3>
-                    <ul className="text-sm text-gray-600 mt-2 grid grid-cols-2 gap-x-4 gap-y-1">
+                  <div className="max-w-md mx-auto p-4 bg-accent rounded-lg border border-border">
+                    <h3 className="font-medium text-accent-foreground">Required Excel Columns:</h3>
+                    <ul className="text-sm text-muted-foreground mt-2 grid grid-cols-2 gap-x-4 gap-y-1">
                       <li>• Name: Patient's name</li>
                       <li>• Age: Patient's age</li>
                       <li>• Gender: Male/Female/Other</li>
@@ -117,32 +134,32 @@ const Index = () => {
             <TabsContent value="analysis" className="space-y-6">
               <PredictionModel timeSeriesData={timeSeriesData} />
               {patientData.length > 0 && (
-                <div className="bg-white p-6 rounded-lg border">
+                <div className="bg-card p-6 rounded-lg border border-border">
                   <h3 className="text-lg font-semibold mb-3">Analysis Insights</h3>
-                  <p className="text-gray-600 mb-4">
+                  <p className="text-muted-foreground mb-4">
                     Based on the patient data analysis, here are some key insights:
                   </p>
-                  <ul className="space-y-2 text-sm text-gray-600">
+                  <ul className="space-y-2 text-sm text-muted-foreground">
                     <li className="flex items-start gap-2">
-                      <span className="text-blue-500 font-bold">•</span>
+                      <span className="text-primary font-bold">•</span>
                       <span>
                         The highest concentration of patients is from <strong>{bestArea?.area}</strong> with {bestArea?.count} patients.
                       </span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-blue-500 font-bold">•</span>
+                      <span className="text-primary font-bold">•</span>
                       <span>
                         Patient distribution across areas shows {areaCounts.length} distinct residential areas.
                       </span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-blue-500 font-bold">•</span>
+                      <span className="text-primary font-bold">•</span>
                       <span>
                         Time trend analysis reveals patterns in patient visits that can help with staffing and resource allocation.
                       </span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-blue-500 font-bold">•</span>
+                      <span className="text-primary font-bold">•</span>
                       <span>
                         Prediction models suggest potential growth in patient numbers for targeted areas.
                       </span>
@@ -155,9 +172,9 @@ const Index = () => {
         </div>
       </main>
       
-      <footer className="bg-white border-t mt-10">
+      <footer className="bg-card border-t mt-10">
         <div className="container mx-auto py-4 px-4">
-          <div className="flex flex-col md:flex-row justify-between items-center text-sm text-gray-500">
+          <div className="flex flex-col md:flex-row justify-between items-center text-sm text-muted-foreground">
             <p>© 2025 Clinic Location Analysis Dashboard</p>
             <p>Data visualizations powered by Recharts</p>
           </div>
