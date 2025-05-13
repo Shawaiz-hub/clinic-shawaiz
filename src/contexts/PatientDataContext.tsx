@@ -1,5 +1,5 @@
 
-import React, { createContext, useState } from "react";
+import React, { createContext, useContext, useState } from "react";
 import { PatientData } from "@/types/PatientData";
 
 interface PatientDataContextType {
@@ -12,7 +12,7 @@ export const PatientDataContext = createContext<PatientDataContextType>({
   setPatientData: () => {},
 });
 
-export const PatientDataProvider = ({ children }: { children: React.ReactNode }) => {
+export const PatientDataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [patientData, setPatientData] = useState<PatientData[]>([]);
   
   return (
@@ -23,7 +23,7 @@ export const PatientDataProvider = ({ children }: { children: React.ReactNode })
 };
 
 export const usePatientData = () => {
-  const context = React.useContext(PatientDataContext);
+  const context = useContext(PatientDataContext);
   if (context === undefined) {
     throw new Error("usePatientData must be used within a PatientDataProvider");
   }
